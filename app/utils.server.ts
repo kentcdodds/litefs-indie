@@ -1,7 +1,7 @@
 export function ensurePrimary() {
-  if (process.env.FLY_REGION !== process.env.PRIMARY_REGION) {
+  if (!process.env.IS_PRIMARY) {
     console.log(
-      `${process.env.FLY_REGION} is not primary (primary is: ${process.env.PRIMARY_REGION}), sending fly replay response`
+      `Instance (${process.env.FLY_INSTANCE}) in ${process.env.FLY_REGION} is not primary (primary is: ${process.env.PRIMARY_INSTANCE}), sending fly replay response`
     );
     throw getFlyReplayResponse();
   }
@@ -10,6 +10,6 @@ export function ensurePrimary() {
 export function getFlyReplayResponse() {
   return new Response("Fly Replay", {
     status: 409,
-    headers: { "fly-replay": `region=${process.env.PRIMARY_REGION}` },
+    headers: { "fly-replay": `instance=${process.env.PRIMARY_INSTANCE}` },
   });
 }
