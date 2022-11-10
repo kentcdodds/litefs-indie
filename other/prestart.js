@@ -10,6 +10,7 @@ async function go() {
   }
 
   if (process.env.PRIMARY_REGION === process.env.FLY_REGION) {
+    console.log(`${process.env.FLY_REGION} is primary. Deploying migrations.`);
     await deployMigrations();
   }
 }
