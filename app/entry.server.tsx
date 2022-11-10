@@ -27,6 +27,10 @@ export default function handleRequest(
           const body = new PassThrough();
 
           responseHeaders.set("Content-Type", "text/html");
+          responseHeaders.set(
+            "fly-region",
+            process.env.FLY_REGION ?? "unknown"
+          );
 
           resolve(
             new Response(body, {
@@ -50,4 +54,9 @@ export default function handleRequest(
 
     setTimeout(abort, ABORT_DELAY);
   });
+}
+
+export function handleDataRequest(response: Response) {
+  response.headers.set("fly-region", process.env.FLY_REGION ?? "unknown");
+  return response;
 }
