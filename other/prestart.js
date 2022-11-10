@@ -7,7 +7,11 @@ async function go() {
     process.env.PRIMARY_REGION = primary.trim();
     console.log(`Found primary region in .primary file: ${primary}`);
   } catch (error) {
-    console.log(`Error getting primary from .primary file:`, error);
+    if (error?.code === "ENOENT") {
+      console.log(`No .primary file found.`);
+    } else {
+      console.log(`Error getting primary from .primary file:`, error);
+    }
     console.log(`Using current region as primary: ${process.env.FLY_REGION}`);
     process.env.PRIMARY_REGION = process.env.FLY_REGION;
   }
