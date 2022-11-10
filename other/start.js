@@ -24,11 +24,28 @@ async function go() {
       `${process.env.FLY_REGION} is not primary (the primary is ${process.env.PRIMARY_REGION}). Skipping migrations.`
     );
   }
+
+  console.log("Starting app...");
+  await startApp();
 }
 go();
 
 async function deployMigrations() {
   const command = "npx prisma migrate deploy";
+  const child = spawn(command, { shell: true, stdio: "inherit" });
+  await new Promise((res, rej) => {
+    child.on("exit", (code) => {
+      if (code === 0) {
+        res();
+      } else {
+        rej();
+      }
+    });
+  });
+}
+
+async function startApp() {
+  const command = "npx remix-serve build";
   const child = spawn(command, { shell: true, stdio: "inherit" });
   await new Promise((res, rej) => {
     child.on("exit", (code) => {

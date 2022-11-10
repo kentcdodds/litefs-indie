@@ -57,8 +57,7 @@ COPY --from=build /myapp/node_modules/.prisma /myapp/node_modules/.prisma
 COPY --from=build /myapp/build /myapp/build
 COPY --from=build /myapp/public /myapp/public
 COPY --from=build /myapp/package.json /myapp/package.json
-COPY --from=build /myapp/start.sh /myapp/start.sh
-COPY --from=build /myapp/other/prestart.js /myapp/other/prestart.js
+COPY --from=build /myapp/other/start.js /myapp/other/start.js
 COPY --from=build /myapp/prisma /myapp/prisma
 
 # prepare for litefs
@@ -66,4 +65,4 @@ COPY --from=litefs /usr/local/bin/litefs /usr/local/bin/litefs
 ADD other/litefs.yml /etc/litefs.yml
 RUN mkdir -p /data /litefs/data
 
-CMD ["litefs", "--", "bash", "start.sh"]
+CMD ["litefs", "--", "node", "./other/start.js"]
