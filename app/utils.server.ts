@@ -1,6 +1,8 @@
 export function ensurePrimary() {
-  const FLY_REGION = process.env.FLY_REGION;
-  if (FLY_REGION !== process.env.PRIMARY_REGION) {
+  if (process.env.FLY_REGION !== process.env.PRIMARY_REGION) {
+    console.log(
+      `${process.env.FLY_REGION} is not primary (primary is: ${process.env.PRIMARY_REGION}), sending fly replay response`
+    );
     throw getFlyReplayResponse();
   }
 }
