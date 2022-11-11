@@ -22,12 +22,12 @@ async function go() {
 
   if (process.env.IS_PRIMARY) {
     console.log(
-      `Instance in (${process.env.FLY_INSTANCE}) ${process.env.FLY_REGION} is primary. Deploying migrations.`
+      `Instance (${process.env.FLY_INSTANCE}) in ${process.env.FLY_REGION} is primary. Deploying migrations.`
     );
     await deployMigrations();
   } else {
     console.log(
-      `Instance in (${process.env.FLY_INSTANCE}) ${process.env.FLY_REGION} is not primary (the primary instance is ${process.env.PRIMARY_INSTANCE}). Skipping migrations.`
+      `Instance (${process.env.FLY_INSTANCE}) in ${process.env.FLY_REGION} is not primary (the primary instance is ${process.env.PRIMARY_INSTANCE}). Skipping migrations.`
     );
   }
 

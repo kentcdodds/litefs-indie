@@ -31,6 +31,11 @@ export default function handleRequest(
             "fly-region",
             process.env.FLY_REGION ?? "unknown"
           );
+          responseHeaders.set("fly-app", process.env.FLY_APP ?? "unknown");
+          responseHeaders.set(
+            "fly-instance",
+            process.env.FLY_INSTANCE ?? "unknown"
+          );
 
           resolve(
             new Response(body, {
