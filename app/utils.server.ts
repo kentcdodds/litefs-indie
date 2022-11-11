@@ -1,15 +1,26 @@
-export function ensurePrimary() {
-  if (!process.env.IS_PRIMARY) {
-    console.log(
-      `Instance (${process.env.FLY_INSTANCE}) in ${process.env.FLY_REGION} is not primary (primary is: ${process.env.PRIMARY_INSTANCE}), sending fly replay response`
-    );
-    throw getFlyReplayResponse();
-  }
-}
+import fs from "fs";
+import os from "os";
 
-export function getFlyReplayResponse() {
-  return new Response("Fly Replay", {
-    status: 409,
-    headers: { "fly-replay": `instance=${process.env.PRIMARY_INSTANCE}` },
-  });
+export async function ensurePrimary() {
+  const currentInstance = os.hostname();
+  let primaryInstance;
+  try {
+    primaryInstance = await fs.promises.readFile(
+      "/litefs/data/.primary",
+      "utf8"
+    );
+    primaryInstance = primaryInstance.trim();
+  } catch (error: unknown) {
+    primaryInstance = currentInstance;
+  }
+
+  if (primaryInstance !== currentInstance) {
+    console.log(
+      `Instance (${currentInstance}) in ${process.env.FLY_REGION} is not primary (primary is: ${primaryInstance}), sending fly replay response`
+    );
+    throw new Response("Fly Replay", {
+      status: 409,
+      headers: { "fly-replay": `instance=${primaryInstance}` },
+    });
+  }
 }

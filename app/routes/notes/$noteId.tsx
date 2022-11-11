@@ -19,7 +19,7 @@ export async function loader({ request, params }: LoaderArgs) {
 }
 
 export async function action({ request, params }: ActionArgs) {
-  ensurePrimary();
+  await ensurePrimary();
   const userId = await requireUserId(request);
   invariant(params.noteId, "noteId not found");
 

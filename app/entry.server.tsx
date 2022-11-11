@@ -3,6 +3,7 @@ import type { EntryContext } from "@remix-run/node";
 import { Response } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import isbot from "isbot";
+import os from "os";
 import { renderToPipeableStream } from "react-dom/server";
 
 const ABORT_DELAY = 5000;
@@ -31,11 +32,8 @@ export default function handleRequest(
             "fly-region",
             process.env.FLY_REGION ?? "unknown"
           );
-          responseHeaders.set("fly-app", process.env.FLY_APP ?? "unknown");
-          responseHeaders.set(
-            "fly-instance",
-            process.env.FLY_INSTANCE ?? "unknown"
-          );
+          responseHeaders.set("fly-app", process.env.FLY_APP_NAME ?? "unknown");
+          responseHeaders.set("fly-instance", os.hostname() ?? "unknown");
 
           resolve(
             new Response(body, {

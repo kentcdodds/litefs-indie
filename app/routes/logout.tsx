@@ -5,7 +5,7 @@ import { logout } from "~/session.server";
 import { ensurePrimary } from "~/utils.server";
 
 export async function action({ request }: ActionArgs) {
-  ensurePrimary();
+  await ensurePrimary();
   return logout(request);
 }
 

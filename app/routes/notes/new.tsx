@@ -8,7 +8,7 @@ import { requireUserId } from "~/session.server";
 import { ensurePrimary } from "~/utils.server";
 
 export async function action({ request }: ActionArgs) {
-  ensurePrimary();
+  await ensurePrimary();
   const userId = await requireUserId(request);
 
   const formData = await request.formData();

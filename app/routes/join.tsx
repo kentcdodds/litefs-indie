@@ -16,7 +16,7 @@ export async function loader({ request }: LoaderArgs) {
 }
 
 export async function action({ request }: ActionArgs) {
-  ensurePrimary();
+  await ensurePrimary();
   const formData = await request.formData();
   const email = formData.get("email");
   const password = formData.get("password");
