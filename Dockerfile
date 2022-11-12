@@ -1,4 +1,4 @@
-FROM flyio/litefs:sha-fabf62d AS litefs
+FROM flyio/litefs:sha-99b891e AS litefs
 
 # base node image
 FROM node:16-bullseye-slim as base
