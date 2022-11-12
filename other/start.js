@@ -1,7 +1,7 @@
 const fs = require("fs");
 const { spawn } = require("child_process");
 const os = require("os");
-const { default: invariant } = require("tiny-invariant");
+const invariant = require("tiny-invariant");
 const path = require("path");
 
 async function go() {

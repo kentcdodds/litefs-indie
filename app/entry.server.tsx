@@ -96,12 +96,13 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
         } else {
           const { FLY_LITEFS_DIR } = process.env;
           invariant(FLY_LITEFS_DIR, "FLY_LITEFS_DIR is not defined");
-          const [txid] = (await fs.promises.readFile(
-            path.join(FLY_LITEFS_DIR, `sqlite.db-pos`)
-          ),
+          const [txid] = (await fs.promises
+            .readFile(path.join(FLY_LITEFS_DIR, `sqlite.db-pos`))
+            .catch(() => "0"),
           "utf-8")
             .trim()
             .split("/");
+          if (!txid) return;
           const localTXNumber = parseInt(txid, 16);
           const sessionTXNumber = parseInt(sessionTXID, 16);
           if (sessionTXNumber > localTXNumber) {
