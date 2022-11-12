@@ -42,6 +42,7 @@ RUN npm run build
 # Finally, build the production image with minimal footprint
 FROM base
 
+ENV FLY="true"
 ENV FLY_LITEFS_DIR="/litefs/data"
 ENV DATABASE_URL="file:/litefs/data/sqlite.db"
 ENV PORT="8080"
