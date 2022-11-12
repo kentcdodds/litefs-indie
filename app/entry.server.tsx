@@ -101,13 +101,7 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
             await sessionStorage.commitSession(session)
           );
         } else {
-          const { FLY_LITEFS_DIR } = process.env;
-          invariant(FLY_LITEFS_DIR, "FLY_LITEFS_DIR is not defined");
-          const dbPos = await fs.promises
-            .readFile(path.join(FLY_LITEFS_DIR, `sqlite.db-pos`), "utf-8")
-            .catch(() => "0");
-          console.log("read sqlite.db-pos file", { dbPos });
-          const [txid] = dbPos.trim().split("/");
+          const txid = await getTXID();
           if (!txid) {
             console.log("UNEXPECTED: no txid found in sqlite.db-pos", { txid });
             return;
@@ -139,12 +133,11 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
       if (currentIsPrimary) {
         const { FLY_LITEFS_DIR } = process.env;
         invariant(FLY_LITEFS_DIR, "FLY_LITEFS_DIR is not defined");
-        const [txid] = (await fs.promises.readFile(
-          path.join(FLY_LITEFS_DIR, `sqlite.db-pos`)
-        ),
-        "utf-8")
-          .trim()
-          .split("/");
+        const txid = await getTXID();
+        if (!txid) {
+          console.log("UNEXPECTED: no txid found in sqlite.db-pos", { txid });
+          return;
+        }
         console.log("Setting txid", txid);
         session.set("txid", txid);
         responseHeaders.append(
@@ -158,4 +151,13 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
       return new Response(null, { status: 405 });
     }
   }
+}
+
+async function getTXID() {
+  const { FLY_LITEFS_DIR } = process.env;
+  invariant(FLY_LITEFS_DIR, "FLY_LITEFS_DIR is not defined");
+  const dbPos = await fs.promises
+    .readFile(path.join(FLY_LITEFS_DIR, `sqlite.db-pos`), "utf-8")
+    .catch(() => "0");
+  return dbPos.trim().split("/")[0];
 }
