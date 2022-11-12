@@ -82,12 +82,19 @@ export async function handleDataRequest(
 async function handleTXID(request: Request, responseHeaders: Headers) {
   const { primaryInstance, currentIsPrimary } = await getInstanceInfo();
 
+  console.log("handleTXID", {
+    primaryInstance,
+    currentIsPrimary,
+    requestMethod: request.method,
+  });
   if (process.env.FLY) {
     const session = await getSession(request);
     if (request.method === "GET" || request.method === "HEAD") {
       const sessionTXID = session.get("txid");
+      console.log({ sessionTXID });
       if (sessionTXID) {
         if (currentIsPrimary) {
+          console.log("currentIsPrimary. Unsetting txid");
           session.unset("txid");
           responseHeaders.append(
             "Set-Cookie",
@@ -96,18 +103,30 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
         } else {
           const { FLY_LITEFS_DIR } = process.env;
           invariant(FLY_LITEFS_DIR, "FLY_LITEFS_DIR is not defined");
-          const [txid] = (await fs.promises
-            .readFile(path.join(FLY_LITEFS_DIR, `sqlite.db-pos`))
-            .catch(() => "0"),
-          "utf-8")
-            .trim()
-            .split("/");
-          if (!txid) return;
+          const dbPos = await fs.promises
+            .readFile(path.join(FLY_LITEFS_DIR, `sqlite.db-pos`), "utf-8")
+            .catch(() => "0");
+          console.log("read sqlite.db-pos file", { dbPos });
+          const [txid] = dbPos.trim().split("/");
+          if (!txid) {
+            console.log("UNEXPECTED: no txid found in sqlite.db-pos", { txid });
+            return;
+          }
           const localTXNumber = parseInt(txid, 16);
           const sessionTXNumber = parseInt(sessionTXID, 16);
+          console.log("Comparing localTXNumber to sessionTXNumber", {
+            localTXNumber,
+            sessionTXNumber,
+          });
           if (sessionTXNumber > localTXNumber) {
+            console.log(
+              "Local TXID is behind session TXID, redirecting to primary instance"
+            );
             return await getFlyReplayResponse(primaryInstance);
           } else {
+            console.log(
+              "Local TXID is ahead of session TXID, clearing session TXID"
+            );
             session.unset("txid");
             responseHeaders.append(
               "Set-Cookie",
@@ -126,11 +145,14 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
         "utf-8")
           .trim()
           .split("/");
+        console.log("Setting txid", txid);
         session.set("txid", txid);
         responseHeaders.append(
           "Set-Cookie",
           await sessionStorage.commitSession(session)
         );
+      } else {
+        console.log("POST request sent to non-primary instance.");
       }
     } else {
       return new Response(null, { status: 405 });
