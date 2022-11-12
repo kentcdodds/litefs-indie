@@ -108,8 +108,6 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
       }
     } else if (request.method === "POST") {
       if (currentIsPrimary) {
-        const { FLY_LITEFS_DIR } = process.env;
-        invariant(FLY_LITEFS_DIR, "FLY_LITEFS_DIR is not defined");
         const txid = await getTXID();
         if (!txid) return;
 
