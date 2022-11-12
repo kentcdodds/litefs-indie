@@ -84,7 +84,7 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
 
   if (process.env.FLY) {
     const session = await getSession(request);
-    if (request.method === "GET") {
+    if (request.method === "GET" || request.method === "HEAD") {
       const sessionTXID = session.get("txid");
       if (sessionTXID) {
         if (currentIsPrimary) {
