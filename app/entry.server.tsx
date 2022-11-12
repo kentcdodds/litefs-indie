@@ -82,45 +82,22 @@ export async function handleDataRequest(
 async function handleTXID(request: Request, responseHeaders: Headers) {
   const { primaryInstance, currentIsPrimary } = await getInstanceInfo();
 
-  console.log("handleTXID", {
-    primaryInstance,
-    currentIsPrimary,
-    requestMethod: request.method,
-  });
   if (process.env.FLY) {
     const session = await getSession(request);
     if (request.method === "GET" || request.method === "HEAD") {
       const sessionTXID = session.get("txid");
-      console.log({ sessionTXID });
+
       if (sessionTXID) {
-        if (currentIsPrimary) {
-          console.log("currentIsPrimary. Unsetting txid");
-          session.unset("txid");
-          responseHeaders.append(
-            "Set-Cookie",
-            await sessionStorage.commitSession(session)
-          );
-        } else {
+        if (!currentIsPrimary) {
           const txid = await getTXID();
-          if (!txid) {
-            console.log("UNEXPECTED: no txid found in sqlite.db-pos", { txid });
-            return;
-          }
+          if (!txid) return;
           const localTXNumber = parseInt(txid, 16);
           const sessionTXNumber = parseInt(sessionTXID, 16);
-          console.log("Comparing localTXNumber to sessionTXNumber", {
-            localTXNumber,
-            sessionTXNumber,
-          });
           if (sessionTXNumber > localTXNumber) {
-            console.log(
-              "Local TXID is behind session TXID, redirecting to primary instance"
-            );
+            // TODO: change all this logic to use the middleware feature instead
+            // so we can just wait for the localTXNumber to catch up
             return await getFlyReplayResponse(primaryInstance);
           } else {
-            console.log(
-              "Local TXID is ahead of session TXID, clearing session TXID"
-            );
             session.unset("txid");
             responseHeaders.append(
               "Set-Cookie",
@@ -134,18 +111,13 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
         const { FLY_LITEFS_DIR } = process.env;
         invariant(FLY_LITEFS_DIR, "FLY_LITEFS_DIR is not defined");
         const txid = await getTXID();
-        if (!txid) {
-          console.log("UNEXPECTED: no txid found in sqlite.db-pos", { txid });
-          return;
-        }
-        console.log("Setting txid", txid);
+        if (!txid) return;
+
         session.set("txid", txid);
         responseHeaders.append(
           "Set-Cookie",
           await sessionStorage.commitSession(session)
         );
-      } else {
-        console.log("POST request sent to non-primary instance.");
       }
     } else {
       return new Response(null, { status: 405 });
