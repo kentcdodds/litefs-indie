@@ -93,7 +93,7 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
           if (!txid) return;
           const localTXNumber = parseInt(txid, 16);
           const sessionTXNumber = parseInt(sessionTXID, 16);
-          if (sessionTXNumber > localTXNumber) {
+          if (sessionTXNumber <= localTXNumber) {
             // TODO: change all this logic to use the middleware feature instead
             // so we can just wait for the localTXNumber to catch up
             return await getFlyReplayResponse(primaryInstance);
