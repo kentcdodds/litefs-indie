@@ -124,10 +124,10 @@ async function handleTXID(request: Request, responseHeaders: Headers) {
 }
 
 async function getTXID() {
-  const { FLY_LITEFS_DIR } = process.env;
+  const { FLY_LITEFS_DIR, DATABASE_FILENAME } = process.env;
   invariant(FLY_LITEFS_DIR, "FLY_LITEFS_DIR is not defined");
   const dbPos = await fs.promises
-    .readFile(path.join(FLY_LITEFS_DIR, `sqlite.db-pos`), "utf-8")
+    .readFile(path.join(FLY_LITEFS_DIR, `${DATABASE_FILENAME}-pos`), "utf-8")
     .catch(() => "0");
   return dbPos.trim().split("/")[0];
 }
